@@ -1,6 +1,14 @@
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
+import { response } from 'express';
 
+interface Request {
+  title: string;
+
+  value: number;
+
+  type: 'income' | 'outcome';
+}
 class CreateTransactionService {
   private transactionsRepository: TransactionsRepository;
 
@@ -8,8 +16,12 @@ class CreateTransactionService {
     this.transactionsRepository = transactionsRepository;
   }
 
-  public execute(): Transaction {
-    // TODO
+  public execute({title, value, type}: Request): Transaction {
+
+    if(type === 'outcome' && this.transactionsRepository.getBalance().total < value)
+      throw new Error('you have no balance for this operation');
+
+    return this.transactionsRepository.create(new Transaction({title, value, type}));
   }
 }
 
